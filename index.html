@@ -1060,7 +1060,7 @@
             <p class="hint">ملاحظة: يمكنك لاحقًا استبدال Placeholder بروابط فعلية.</p>
           </div>
 
-          <form class="reveal" id="contactForm">
+          <form class="reveal" id="contactForm" action="https://formsubmit.co/abdelhammid.shalabi@gmail.com" method="POST">
 
             <div class="row">
               <div>
@@ -1101,6 +1101,11 @@
               <button class="btn" type="submit">إرسال الطلب</button>
               <button class="btn secondary" type="button" id="copyMsg">نسخ الرسالة</button>
             </div>
+
+            <input type="hidden" name="_next" value="https://ibrahimfakhrey.github.io/code_verse/#contact">
+            <input type="hidden" name="_subject" value="طلب جديد - CodeVerse">
+            <input type="hidden" name="_template" value="table">
+            <input type="hidden" name="_captcha" value="false">
 
             <div class="hint">
               سيتم إرسال طلبك مباشرة إلى فريق CodeVerse.
@@ -1174,11 +1179,11 @@
     }
     window.showToast = showToast;
 
-    // Contact form - AJAX submission to Formsubmit.co
+    // Contact form - try AJAX first, fallback to regular submission
     const form = document.getElementById('contactForm');
-    form?.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    let emailActivated = localStorage.getItem('formsubmit_activated') === 'true';
 
+    form?.addEventListener('submit', async (e) => {
       const fullName = document.getElementById('fullName')?.value.trim();
       const company = document.getElementById('company')?.value.trim();
       const phone = document.getElementById('phone')?.value.trim();
@@ -1187,11 +1192,20 @@
 
       // Basic validation
       if (!fullName || !company || !phone || !service || !message){
+        e.preventDefault();
         showToast('تنبيه', 'تأكد من تعبئة جميع الحقول.');
         return;
       }
 
-      // Show loading
+      // If not activated yet, let normal form submission happen (for activation)
+      if (!emailActivated) {
+        localStorage.setItem('formsubmit_activated', 'true');
+        return; // Allow normal form POST
+      }
+
+      // Try AJAX submission
+      e.preventDefault();
+
       const submitBtn = form.querySelector('button[type="submit"]');
       const originalText = submitBtn.textContent;
       submitBtn.textContent = 'جاري الإرسال...';
